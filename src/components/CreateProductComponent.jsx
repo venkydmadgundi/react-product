@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import ProductService from '../services/ProductService';
 import SaveSharpIcon from '@material-ui/icons/SaveSharp';
 import CancelSharpIcon from '@material-ui/icons/CancelSharp';
+import Progressbar from './Progressbar'
 
 class CreateProductComponent extends Component {
     constructor(props) {
@@ -13,7 +14,8 @@ class CreateProductComponent extends Component {
             name: '',
             description: '',
             price: '',
-            stock: ''
+            stock: '',
+            show: false
         }
         this.changeNameHandler = this.changeNameHandler.bind(this);
         this.changeDescriptionHandler = this.changeDescriptionHandler.bind(this);
@@ -37,7 +39,9 @@ class CreateProductComponent extends Component {
             });
         }        
     }
+
     saveOrUpdateProduct = (e) => {
+        this.setState({show:true});
 
         e.preventDefault();
         let product = {name: this.state.name, description: this.state.description, price: this.state.price, stock: this.state.stock };
@@ -46,13 +50,20 @@ class CreateProductComponent extends Component {
         // step 5
         if(this.state.id === '_add'){
             ProductService.createProduct(product).then(res =>{
-                this.props.history.push('/products');
+                this.setStatusAndHistory();
             });
         }else{
             ProductService.updateProduct(product, this.state.id).then( res => {
-                this.props.history.push('/products');
+                 this.setStatusAndHistory();    
             });
-        }
+        } 
+    }
+
+    setStatusAndHistory(){
+        setTimeout(()=> { 
+                    this.setState({show:false});
+                    this.props.history.push('/products');
+                }, 2000); 
     }
     
     changeNameHandler= (event) => {
@@ -83,10 +94,12 @@ class CreateProductComponent extends Component {
         }
     }
     render() {
+        var url = "https://stackblitz.com/files/react-spinner-sample/github/RahmanM/react-spinner-sample/master/loading.gif";
         return (
             <div>
                 <br></br>
                    <div className = "container">
+                        <Progressbar show={this.state.show} imageUrl={url} height="90" width="90" alignment="middle" alttext="Loading..." />
                         <div className = "row">
                             <div className = "card col-md-6 offset-md-3 offset-md-3">
                                 {

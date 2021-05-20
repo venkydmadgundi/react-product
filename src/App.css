@@ -44,3 +44,11 @@
 .btn {
   margin-top: "20px";
 }
+
+td.numeric {
+  text-align: right;
+}
+
+.action {
+  text-align: center;
+}
