@@ -4,6 +4,8 @@ import SaveSharpIcon from '@material-ui/icons/SaveSharp';
 import CancelSharpIcon from '@material-ui/icons/CancelSharp';
 import Progressbar from './Progressbar'
 
+const PRODUCT_API_BASE_URL = "http://localhost:8080/api/v1/products/";
+
 class CreateProductComponent extends Component {
     constructor(props) {
         super(props)
@@ -29,15 +31,22 @@ class CreateProductComponent extends Component {
         if(this.state.id === '_add'){
             return
         }else{
-            ProductService.getProductById(this.state.id).then( (res) =>{
-                let product = res.data;
+            fetch(PRODUCT_API_BASE_URL + this.state.id, {
+              method: 'GET'
+            })
+            .then(response => response.json())
+            .then(result => {
+                let product = result;
                 this.setState({name: product.name,
                     description: product.description,
                     price : product.price,
                     stock : product.stock
                 });
+            })
+            .catch(error => {
+                console.error('Error:', error);
             });
-        }        
+            }
     }
 
     saveOrUpdateProduct = (e) => {
@@ -49,13 +58,29 @@ class CreateProductComponent extends Component {
 
         // step 5
         if(this.state.id === '_add'){
-            ProductService.createProduct(product).then(res =>{
-                this.setStatusAndHistory();
-            });
+            fetch((PRODUCT_API_BASE_URL ), {
+              method: 'POST',
+              body: JSON.stringify(product),
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+                }
+            })
+            .then(this._checkStatus)
+            .then(this._parseJSON)
+            .then(this.setStatusAndHistory());
         }else{
-            ProductService.updateProduct(product, this.state.id).then( res => {
-                 this.setStatusAndHistory();    
-            });
+            fetch((PRODUCT_API_BASE_URL + this.state.id ), {
+              method: 'PUT',
+              body: JSON.stringify(product),
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+                }
+            })
+            .then(this._checkStatus)
+            .then(this._parseJSON)
+            .then(this.setStatusAndHistory());
         } 
     }
 

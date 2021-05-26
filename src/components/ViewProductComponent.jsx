@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import ProductService from '../services/ProductService'
 
+const PRODUCT_API_BASE_URL = "http://localhost:8080/api/v1/products/";
+
 class ViewProductComponent extends Component {
     constructor(props) {
         super(props)
@@ -12,9 +14,16 @@ class ViewProductComponent extends Component {
     }
 
     componentDidMount(){
-        ProductService.getProductById(this.state.id).then( res => {
-            this.setState({product: res.data});
+        fetch(PRODUCT_API_BASE_URL + this.state.id, {
+          method: 'GET'
         })
+        .then(response => response.json())
+        .then(result => {
+            this.setState({ product: result});
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
     }
 
     render() {

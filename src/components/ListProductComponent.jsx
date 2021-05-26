@@ -7,6 +7,8 @@ import ViewHeadlineSharpIcon from '@material-ui/icons/ViewHeadlineSharp';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import Progressbar from './Progressbar';
 
+const PRODUCT_API_BASE_URL = "http://localhost:8080/api/v1/products/";
+
 class ListProductComponent extends Component {
     constructor(props) {
         super(props)
@@ -21,15 +23,29 @@ class ListProductComponent extends Component {
     }
 
     componentDidMount(){
-        ProductService.getProducts().then((res) => {
-            this.setState({ products: res.data});
+        fetch(PRODUCT_API_BASE_URL, {
+          method: 'GET'
+        })
+        .then(response => response.json())
+        .then(result => {
+            this.setState({ products: result});
+        })
+        .catch(error => {
+            console.error('Error:', error);
         });
     }
 
     deleteProduct(id){
         this.setState({show:true});
-        ProductService.deleteProduct(id).then( res => {
+        fetch(PRODUCT_API_BASE_URL + id, {
+          method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(result => {
             this.setStatusAndHistory(this.state.products.filter(product => product.id !== id));
+        })
+        .catch(error => {
+            console.error('Error:', error);
         });
     }
 
@@ -84,7 +100,7 @@ class ListProductComponent extends Component {
                                         <tr key = {product.id}>
                                              <td> {product.name} </td>   
                                              <td> {product.description}</td>
-                                             <td className='numeric'> {product.price}</td>
+                                             <td className='numeric'> {product.price.toFixed(2)}</td>
                                              <td className='numeric'> {product.stock}</td>
                                              <td className='action'>
                                                  <button onClick={ () => this.editProduct(product.id)} className="btn btn-info"><EditSharpIcon/> </button>
