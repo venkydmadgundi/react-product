@@ -1,4 +1,9 @@
 import React, { Component } from 'react'
+import { Row, Col, Container } from 'react-bootstrap';
+import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
+import ProductPagination from './ProductPagination';
+import 'bootstrap/dist/css/bootstrap.css';
+
 import ProductService from '../services/ProductService';
 
 import Delete from '@material-ui/icons/Delete'; 
@@ -9,13 +14,18 @@ import Progressbar from './Progressbar';
 
 const PRODUCT_API_BASE_URL = "http://localhost:8080/api/v1/products/";
 
+const pageNumbers = [];
+
 class ListProductComponent extends Component {
     constructor(props) {
         super(props)
 
         this.state = {
                 products: [],
-                show: false
+                show: false,
+                total: null,
+                per_page: null,
+                current_page: 1,
         }
         this.addProduct = this.addProduct.bind(this);
         this.editProduct = this.editProduct.bind(this);
@@ -23,17 +33,38 @@ class ListProductComponent extends Component {
     }
 
     componentDidMount(){
-        fetch(PRODUCT_API_BASE_URL, {
-          method: 'GET'
-        })
-        .then(response => response.json())
-        .then(result => {
-            this.setState({ products: result});
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+        // fetch(PRODUCT_API_BASE_URL, {
+        //   method: 'GET'
+        // })
+        // .then(response => response.json())
+        // .then(result => {
+        //     this.setState({ products: result});
+        // })
+        // .catch(error => {
+        //     console.error('Error:', error);
+        // });
+        this.makeHttpRequestWithPage(1);
     }
+
+    makeHttpRequestWithPage = async pageNumber => {
+    const response = await fetch(PRODUCT_API_BASE_URL +`?page=${pageNumber}`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
+
+    this.setState({
+      products: data['productList'],
+      total: data['totalCount'],
+      per_page: data['numberPage'],
+      current_page: pageNumber
+    });
+  }
+
 
     deleteProduct(id){
         this.setState({show:true});
@@ -68,7 +99,9 @@ class ListProductComponent extends Component {
         this.props.history.push('/add-product/_add');
     }
 
+
     render() {
+
         var url = "https://stackblitz.com/files/react-spinner-sample/github/RahmanM/react-spinner-sample/master/loading.gif";
         return (
             <div>
